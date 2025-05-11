@@ -23,7 +23,7 @@ runs:
     - name: Extract Binary Ninja
       shell: bash
       run: |
-        ARCHIVE_PATH="${{ github.action_path }}/binaryninja/${{ inputs.version }}/binaryninja.7z"
+        ARCHIVE_PATH="${{ github.action_path }}/binaryninja/${{ inputs.version }}/binaryninja.7z.001"
         if [ ! -f "$ARCHIVE_PATH" ]; then
           echo "Error: Binary Ninja archive not found at $ARCHIVE_PATH"
           exit 1
