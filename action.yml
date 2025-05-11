@@ -1,0 +1,54 @@
+name: 'Setup Binary Ninja'
+description: 'Setup Binary Ninja by decompressing the archive to /opt'
+author: 'Binary Ninja'
+
+inputs:
+  version:
+    description: 'Binary Ninja version'
+    required: true
+    default: '4.2.6455'
+  password:
+    description: 'Decryption password for Binary Ninja archive'
+    required: true
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set BN_USER_DIRECTORY
+      shell: bash
+      run: |
+        echo "BN_USER_DIRECTORY=$HOME/.binaryninja" >> $GITHUB_ENV
+        mkdir -p "$HOME/.binaryninja"
+
+    - name: Extract Binary Ninja
+      shell: bash
+      run: |
+        ARCHIVE_PATH="${{ github.action_path }}/binaryninja/${{ inputs.version }}/binaryninja.7z"
+        if [ ! -f "$ARCHIVE_PATH" ]; then
+          echo "Error: Binary Ninja archive not found at $ARCHIVE_PATH"
+          exit 1
+        fi
+
+        echo "Extracting binaryninja directory to /opt..."
+        echo "::add-mask::${{ inputs.password }}"
+        sudo 7z x "$ARCHIVE_PATH" -p"${{ inputs.password }}" -o/opt -r -bsp0 -snld binaryninja/*
+
+        echo "Extracting license.dat to $BN_USER_DIRECTORY..."
+        sudo 7z x "$ARCHIVE_PATH" -p"${{ inputs.password }}" -o"$BN_USER_DIRECTORY" -bsp0 -snld license.dat
+
+        echo "Binary Ninja extracted successfully."
+
+    - name: Verify Installation and Set Outputs
+      id: verify
+      shell: bash
+      run: |
+        ls -d /opt/binaryninja && echo "install-path=/opt/binaryninja" >> $GITHUB_OUTPUT
+        ls -l "$BN_USER_DIRECTORY" && echo "user-dir=$BN_USER_DIRECTORY" >> $GITHUB_OUTPUT
+
+outputs:
+  install-path:
+    description: 'Path to the installed Binary Ninja core files'
+    value: ${{ steps.verify.outputs.install-path }}
+  user-dir:
+    description: 'Path to the Binary Ninja user directory (BN_USER_DIRECTORY)'
+    value: ${{ steps.verify.outputs.user-dir }}
