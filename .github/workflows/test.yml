@@ -1,0 +1,27 @@
+name: Test Binary Ninja Setup
+
+on:
+  push:
+    branches:
+      - main
+  # workflow_dispatch:
+
+jobs:
+  test_binaryninja_api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Setup Binary Ninja
+        id: setup_bn # Add an id to reference outputs
+        uses: ${{ github.repository }}@${{ github.sha }}
+        with:
+          version: '4.2.6455'
+          password: ${{ secrets.BN_PASSWORD_426455 }}
+
+      - name: Run Binary Ninja Python API check
+        run: |
+          uv venv --python=3.10
+          uv run python ${{ steps.setup_bn.outputs.install-path }}/scripts/install_api.py
+          uv run python -c 'import binaryninja as bn; assert bn._init_plugins() is None; assert bn.core_ui_enabled() is not None; print("BN API check PASSED!!")'
