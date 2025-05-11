@@ -15,7 +15,7 @@ jobs:
 
       - name: Setup Binary Ninja
         id: setup_bn # Add an id to reference outputs
-        uses: ${{ github.repository }}@${{ github.sha }}
+        uses: MCPPhalanx/action-setup-binaryninja@main
         with:
           version: '4.2.6455'
           password: ${{ secrets.BN_PASSWORD_426455 }}
